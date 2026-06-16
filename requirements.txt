@@ -1,0 +1,7 @@
+langchain>=1.1.0
+langchain-core>=1.1.0
+langchain-groq>=1.1.0
+fastapi>=0.126.0
+uvicorn>=0.40.0
+requests
+python-dotenv>=1.2.1

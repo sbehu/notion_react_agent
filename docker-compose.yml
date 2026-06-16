@@ -1,0 +1,18 @@
+services:
+  app:
+    build: .
+    image: react_agent:latest 
+    container_name: react_agent_container
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # 👇 CHANGE THIS LINE TO MAP TO YOUR CURRENT LOCAL DIRECTORY 👇
+      - .:/app  
+      - /app/__pycache__
+
+# You can leave the bottom volumes section as is, or remove it later.
+volumes:
+  agent_data:

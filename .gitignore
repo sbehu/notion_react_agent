@@ -1,0 +1,21 @@
+# Python-generated caching
+__pycache__/
+*.py[cod]
+*$py.class
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Local Environment Secrets
+.env
+
+# Virtual Environments (Catches env, .env, venv, and .venv)
+env/
+.env/
+venv/
+.venv/
+
+# Ide & OS junk
+.vscode/
+.DS_Store
