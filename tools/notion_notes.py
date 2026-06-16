@@ -20,7 +20,6 @@ def get_notes() -> str:
         "Notion-Version": "2022-06-28"
     }
     
-    # Query database endpoint
     url = f"https://api.notion.com/v1/databases/{db_id}/query"
 
     try:
@@ -36,30 +35,27 @@ def get_notes() -> str:
                 "any notes saved yet, and offer to create a new note for them."
             )
             
-        # Parse the structured database rows into a readable list for the LLM
         parsed_notes = []
         for page in results:
+            page_id = page.get("id")  # Secure the actual UUID field
             properties = page.get("properties", {})
             
-            # Match the key structure used in your add_note tool ('Note' column)
             note_prop = properties.get("Note", {}).get("title", [])
             if note_prop:
                 text_content = note_prop[0].get("text", {}).get("content", "")
                 if text_content:
-                    parsed_notes.append(text_content)
+                    parsed_notes.append(f"Content: '{text_content}' | page_id: '{page_id}'")
                     
         if not parsed_notes:
             return "System Notice: Notes exist in the DB but could not find any text content under the 'Note' column title."
 
-        return f"Found the following saved notes in user's workspace:\n" + "\n".join(f"- {note}" for note in parsed_notes)
+        return f"Found the following saved notes in user's workspace:\n" + "\n".join(parsed_notes)
 
     except Exception as e:
         return (
             f"System Error: Unable to fetch notes from Notion right now. "
-            f"The API threw this error: {e}. Inform the user gracefully that "
-            f"there is a technical connection issue with Notion and try again later."
+            f"The API threw this error: {e}."
         )    
-
 
 @tool
 def add_note(note: str) -> str:
@@ -82,18 +78,10 @@ def add_note(note: str) -> str:
         "parent": {"database_id": db_id},
         "properties": {
             "Note": {
-                "title": [
-                    {
-                        "text": {
-                            "content": note
-                        }
-                    }
-                ]
+                "title": [{"text": {"content": note}}]
             },
             "Status": {
-                "select": {
-                    "name": "Pending"
-                }
+                "select": {"name": "Pending"}
             }
         }
     }
@@ -102,6 +90,5 @@ def add_note(note: str) -> str:
         res = requests.post(url, headers=headers, json=payload)
         res.raise_for_status()
         return f"Note added successfully: '{note}'"
-        
     except Exception as e:
         return f"Error adding note to Notion: {str(e)}"
