@@ -64,6 +64,7 @@ def create_react_agent_v3():
     memory = MemorySaver()
 
     try:
+        llm_with_tools = llm.bind_tools(tools)
         agent = create_react_agent(
             model=llm, 
             tools=tools, 
