@@ -4,7 +4,7 @@ from langchain_groq import ChatGroq
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 
-# 1. CLEAN TOOL IMPORTS
+# 1. CORRECT COMPATIBLE TOOL IMPORTS
 from tools.delete_notion_page import delete_notion_page
 from langchain_community.tools import DuckDuckGoSearchRun
 from tools.notion_notes import get_notes, add_note
@@ -13,7 +13,7 @@ from tools.notion_calendar import get_calendar_events, add_calendar_event, delet
 
 logger = logging.getLogger(__name__)
 
-# Instantiate global tools
+# Correctly instantiate the tool as an executable tool structure
 web_search_tool = DuckDuckGoSearchRun()
 
 def get_llm():
@@ -22,7 +22,6 @@ def get_llm():
         logger.error("Groq api key is not set")
         raise ValueError
     
-    # Swapped to the production standard 70B parameter model for complex multi-tool reliability
     return ChatGroq(model="llama-3.3-70b-versatile", temperature=0.0, api_key=api_key)
 
 def create_react_agent_v3():
@@ -33,9 +32,9 @@ def create_react_agent_v3():
     tools = [
         web_search_tool,       
         get_weather,
-        get_notes,             # For listing/searching note records and extracting page_ids
-        add_note,              # For creating text rows
-        delete_notion_page,    # Connected custom deletion tool
+        get_notes,             
+        add_note,              
+        delete_notion_page,    
         get_calendar_events,
         add_calendar_event,
         delete_calendar_event
@@ -64,7 +63,7 @@ def create_react_agent_v3():
     memory = MemorySaver()
 
     try:
-        llm_with_tools = llm.bind_tools(tools)
+        # Enforce native LLM tool structural alignment directly in the compiler
         agent = create_react_agent(
             model=llm, 
             tools=tools, 
