@@ -1,7 +1,6 @@
 import os
 import logging
 from langchain_groq import ChatGroq
-from langchain_core.messages import SystemMessage
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -41,35 +40,34 @@ def create_react_agent_v3():
         delete_calendar_event
     ]
 
-    # 3. CLEAN SYSTEM MESSAGE (Removed confusing text instructions about syntax format)
-    system_instructions = SystemMessage(
-        content=(
-            "You are a helpful AI assistant with native capability to execute tools for web search, weather, notes, and calendar management.\n\n"
-            
-            "NOTION NOTES RULES:\n"
-            "1. Only use note tools if explicitly asked to manage notes.\n"
-            "2. To delete a note, you MUST first call 'get_notes' to find the target item, copy its real 'page_id' UUID string, and pass it directly into 'delete_notion_page'.\n\n"
+    # 3. CLEAN SYSTEM INSTRUCTIONS AS A PLAIN STRING
+    # Dropped all mentions of syntax/formatting tags so the LLM doesn't text-loop them
+    system_instructions = (
+        "You are a helpful AI assistant with access to tools for web search, weather, notes, and calendar management.\n\n"
+        
+        "NOTION NOTES RULES:\n"
+        "1. Only use note tools if explicitly asked to manage notes.\n"
+        "2. To delete a note, you MUST first call 'get_notes' to find the target item, copy its real 'page_id' UUID string, and pass it directly into 'delete_notion_page'.\n\n"
 
-            "CALENDAR RULES:\n"
-            "1. To cancel or delete an event, you MUST first call 'get_calendar_events' for that specific date, locate the item, copy its 'event_id' UUID string, and pass it into 'delete_calendar_event'.\n\n"
-            
-            "GENERAL UTILITIES:\n"
-            "- Use DuckDuckGoSearchRun for current events or real-time information you do not know.\n"
-            "- Call only ONE tool per turn. Wait for the tool response before making any decisions."
-        )
+        "CALENDAR RULES:\n"
+        "1. To cancel or delete an event, you MUST first call 'get_calendar_events' for that specific date, locate the item, copy its 'event_id' UUID string, and pass it into 'delete_calendar_event'.\n\n"
+        
+        "GENERAL UTILITIES:\n"
+        "- Use DuckDuckGoSearchRun for current events or real-time information you do not know.\n"
+        "- Call only ONE tool per turn. Wait for the tool response before making any decisions."
     )
 
     memory = MemorySaver()
 
     try:
-        # Pass the SystemMessage object directly to state modifier parameter
+        # Reverted key parameter back to 'prompt' to match your container's schema signature
         agent = create_react_agent(
             model=llm, 
             tools=tools, 
-            state_modifier=system_instructions,
+            prompt=system_instructions,
             checkpointer=memory
         )
-        logger.info("Agent V3 Initialised successfully with standard state modifier")
+        logger.info("Agent V3 Initialised successfully with compatible prompt string")
         return agent
     except Exception as e:
         logger.error(f"Failed to create agent: {e}")
