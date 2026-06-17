@@ -17,6 +17,8 @@ COPY requirements.txt .
 # and completely overrides any old or missing text file versions!
 
 RUN uv pip install --system --no-cache langchain-community duckduckgo-search ddgs -r requirements.txt
+
+COPY . .
 EXPOSE 8000
 
 # Run uvicorn cleanly through the system layer
