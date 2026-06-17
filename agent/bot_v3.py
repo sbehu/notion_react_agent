@@ -22,8 +22,8 @@ def get_llm():
         logger.error("Groq api key is not set")
         raise ValueError
     
-    # Static production model with absolute 0.0 temperature to ensure strict tool formatting execution
-    return ChatGroq(model="llama-3.1-8b-instant", temperature=0.0, api_key=api_key)
+    # Swapped to the production standard 70B parameter model for complex multi-tool reliability
+    return ChatGroq(model="llama-3.3-70b-versatile", temperature=0.0, api_key=api_key)
 
 def create_react_agent_v3():
     logger.info("Initialising Fresh Agent V3 with Memory and Web Search")
@@ -64,7 +64,6 @@ def create_react_agent_v3():
     memory = MemorySaver()
 
     try:
-        # Reverted parameter to a plain string to eliminate the <class 'list'> crash
         agent = create_react_agent(
             model=llm, 
             tools=tools, 
